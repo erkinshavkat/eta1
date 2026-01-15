@@ -32,6 +32,7 @@ phi_hat = fft2(phi);eta_hat = fft2(eta);
 %plotting
 faria_ax=plot(p.x,zeros(Nx,1),"LineWidth",2,"DisplayName","Faria"); hold on
 H_ax=plot(p.x,zeros(Nx,1),"LineWidth",2,"DisplayName","H"); hold on
+legend()
 ylim([-0.02,0.02])
 yyaxis right
 topo=plot(p.x,p.d_grid(end/2,:),"Color",'black',"LineWidth",1,"DisplayName","topo"); hold on
@@ -39,33 +40,28 @@ ylim([0.1,0.25])
 for n=1:nimpacts
     
     disp(['Impact number: ' num2str(n)])
-    %Faria impact by computing delta jump for phi_hat
     [~, ~, phi_hat] = drop_impact_matt(xi,yi, ui, vi, phi_hat, eta_hat, p);
 
-    %H impact by setting dH=1
     dH_vec(:,n)=1;
     
     for nn=1:p.nsteps_impact 
-        % loop for time integration between impacts
         
-        %integrate Faria and H
         [phi_hat, eta_hat] = evolve_wave_IF_rkstep(phi_hat, eta_hat, t, p); 
         [H_vec, dH_vec] = H_eq_rkstep(H_vec, dH_vec, t, p);
-
-        %compute Faria eta with ift
-        faria_eta=real(ifft2(eta_hat));
-
-        %evaluate eta from H. b4_eta can only evaluate one point at once. To evaluate along (x,0), need loop
-        H_eta=zeros(Nx,1);
-        for index=1:Nx
-            H_eta(index)=b4_eta(p.x(index),0,0,0,H_vec,p);
-        end
-
-        faria_ax.YData=faria_eta(Nx/2+1,:);
-        H_ax.YData=H_eta;
-        pause(0.01)
         t=t+p.dt;
+
+
     end
+    faria_eta=real(ifft2(eta_hat));
+
+    H_eta=zeros(Nx,1);
+    for index=1:Nx
+        H_eta(index)=eta0_num(p.x(index),0,0,0,H_vec,p);
+    end
+
+    faria_ax.YData=faria_eta(Nx/2+1,:);
+    H_ax.YData=H_eta;
+    pause(0.01)
 
 
 

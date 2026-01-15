@@ -1,4 +1,4 @@
-function integral = b4_eta(x, y, x_data,y_data,H_data,p)
+function integral = eta0_num(x, y, x_data,y_data,H_data,p)
     %% Formerly B4, now 3.10, computes eta at (x,y)
     % x, y (1x1), position to valuate eta
     % xdata, y_data (Nimpacts,1), position of past impacts

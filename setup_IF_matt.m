@@ -44,7 +44,7 @@ TF          = 4*pi/omega0;      % Chosen time scale (Faraday period)
 xF          = 2*pi/kf_mean;     % Chosen spatial scale (Farday wavelength)
 
 
-epsilon=1;
+epsilon=0.1;
 rng(0)
 %% Dimensional topography
 H0=H;
@@ -82,7 +82,7 @@ b_grid= tanh(kf_grid.*H_grid)./kf_grid;
 %% Nondimensionalized d
 d0=  b0/ xF;
 d_grid=b_grid / xF;
-d1= d_grid - d0;
+d1= (d_grid - d0)/ epsilon;
 
 
 
