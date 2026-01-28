@@ -52,7 +52,7 @@ for n=1:nimpacts
 
 
     end
-    faria_eta=real(ifft2(eta_hat));
+    faria_eta=gather(real(ifft2(eta_hat)));
 
     H_eta=zeros(Nx,1);
     for index=1:Nx
@@ -61,7 +61,7 @@ for n=1:nimpacts
 
     faria_ax.YData=faria_eta(Nx/2+1,:);
     H_ax.YData=H_eta;
-    pause(0.01)
+    pause(0.1)
 
 
 

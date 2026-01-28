@@ -1,4 +1,4 @@
-function [ui, vi, etaprime_hat] = b1k_impact(xi,yi, ui, vi, etaprime_hat, p)
+function [ui, vi, etaprime_hat] = eta0k_impact(xi,yi, ui, vi, etaprime_hat, p)
 
 %{
 % DESCRIBES THE INSTANTANEOUS INTERACTION BETWEEN THE DROP AND THE SURFACE

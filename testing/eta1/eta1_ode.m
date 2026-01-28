@@ -1,0 +1,102 @@
+clear; close all; clc
+addpath(genpath(pwd))
+% gamma=4.4974; H=0.005;
+
+gamma=5.4953;H=0.001;
+
+Lx=16; Nx=192;
+Nk=Nx; Lk=12*pi;
+mem=0.90; theta=1.3;
+eta0=zeros(Nx);
+omega=80;
+nimpacts=100;
+for epsilon = [0.1,0.5,1]
+    close all;
+    figure('Position',[0 0 1200 800])
+
+    p = setup_IF_matt(gamma,H,eta0,Nx,Lx,Nk,Lk,theta,mem,omega,epsilon);
+    
+    
+    t = p.theta/(4*pi);
+    
+    phi = zeros(p.Nx,p.Ny); eta =zeros(p.Nx,p.Ny); 
+    phi_hat = fft2(phi);eta_hat = fft2(eta);
+    
+    eta0=zeros(p.Nx,p.Ny);eta0prime=zeros(p.Nx,p.Ny);
+    eta0_hat=fft2(eta0);eta0prime_hat=fft2(eta0prime);
+    
+    eta1full=zeros(p.Nx,p.Ny);eta1fullprime=zeros(p.Nx,p.Ny);
+    eta1full_hat=fft2(eta1full);eta1fullprime_hat=fft2(eta1fullprime);
+    
+    eta1lap=zeros(p.Nx,p.Ny);eta1lapprime=zeros(p.Nx,p.Ny);
+    eta1lap_hat=fft2(eta1lap);eta1lapprime_hat=fft2(eta1lapprime);
+    
+    %plotting
+    faria_ax=plot(p.x,zeros(Nx,1),"LineWidth",3,"DisplayName","Faria"); hold on
+    eta0_ax=plot(p.x,zeros(Nx,1),"LineWidth",3,"DisplayName","\eta_0"); hold on
+    eta1fullR_ax=plot(p.x,zeros(Nx,1),"LineWidth",2,"DisplayName","\eta_0+\epsilon\eta_1 full R"); hold on
+    eta1lapR_ax=plot(p.x,zeros(Nx,1),"LineWidth",2,'LineStyle','--',"DisplayName","\eta_0+\epsilon\eta_1 simplified R"); hold on
+    
+    legend()
+    xlim([-8 8]);
+    ylim([-0.005,0.005])
+    yyaxis right
+    topo=plot(p.x,p.H_grid(end/2,:),"Color",'black',"LineWidth",1,"DisplayName","topo"); hold on
+    topo0=plot(p.x,p.H0.*ones(size(p.x)),"Color",'black',"LineWidth",1,'LineStyle','--',"DisplayName","b0"); hold on
+    
+    ylim([0.0005,0.002])
+    ylabel('h (m)')
+    
+    %xps=zeros(nimpacts,1);
+    %yps=zeros(nimpacts,1);
+    xps=linspace(0,0,nimpacts);
+    yps=zeros(nimpacts,1);
+    R_data=zeros(nimpacts*p.nsteps_impact,Nx,Nx);
+    RH_index=1;
+    
+    filename = sprintf('vis/fullvlapR_eps%0.2f_mem%.2f_sin_bounce',epsilon,mem);
+    avi_writer = VideoWriter(filename);
+    avi_writer.FrameRate = 6;
+    open(avi_writer);
+    
+    ui=0;vi=0;
+    for n=1:nimpacts
+        xi=xps(n); yi=yps(n);
+        disp(['Impact number: ' num2str(n)])
+        [~, ~, phi_hat] = drop_impact_matt(xi,yi, ui, vi, phi_hat, eta_hat, p);
+        [~, ~, eta0prime_hat] = eta0k_impact(xi,yi, ui, vi, eta0prime_hat, p);
+        
+        for nn=1:p.nsteps_impact 
+            t=t+p.dt;
+            [phi_hat, eta_hat] = evolve_wave_IF_rkstep(phi_hat, eta_hat, t, p);
+            [eta0_hat, eta0prime_hat] = eta0k_rkstep(eta0_hat, eta0prime_hat, t, p);
+            Rhat_full = Rhat_num(eta0_hat,eta0prime_hat,t,p);
+            Rhat_lap = Rhat_mild(eta0_hat,eta0prime_hat,t,p);
+    
+            [eta1full_hat, eta1fullprime_hat] = eta1_ode_rkstep(eta1full_hat, eta1fullprime_hat,Rhat_full, t, p);
+            [eta1lap_hat, eta1lapprime_hat] = eta1_ode_rkstep(eta1lap_hat, eta1lapprime_hat,Rhat_lap, t, p);
+    
+            % R_data(RH_index,:,:)=Rhat_snapshot;
+            % RH_index=RH_index+1;
+    
+        end
+        faria_eta=gather(real(ifft2(eta_hat)));
+        eta0=gather(real(ifft2(eta0_hat)));
+        eta1full=gather(real(ifft2(eta1full_hat)));
+        eta1lap=gather(real(ifft2(eta1lap_hat)));
+    
+        
+        faria_ax.YData=faria_eta(Nx/2+1,:);
+        eta0_ax.YData=eta0(Nx/2+1,:);
+        eta1fullR_ax.YData=eta0(Nx/2+1,:)+epsilon*eta1full(Nx/2+1,:);
+        eta1lapR_ax.YData=eta0(Nx/2+1,:)+epsilon*eta1lap(Nx/2+1,:);
+        drawnow;
+        frame = getframe(gcf);
+        writeVideo(avi_writer, frame);
+    
+    
+    
+    end
+    
+    close(avi_writer);
+end

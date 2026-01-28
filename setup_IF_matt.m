@@ -1,4 +1,4 @@
-function p = setup_IF_matt(Gam,H,eta0,Nx,Lx,Nk,kmax,theta,mem,omega)
+function p = setup_IF_matt(Gam,H,eta0,Nx,Lx,Nk,kmax,theta,mem,omega,epsilon)
 % Sets most of the parameters for the problem
 % Input: 
 %   Nx          -------- Number of points in x
@@ -44,16 +44,17 @@ TF          = 4*pi/omega0;      % Chosen time scale (Faraday period)
 xF          = 2*pi/kf_mean;     % Chosen spatial scale (Farday wavelength)
 
 
-epsilon=0.1;
 rng(0)
 %% Dimensional topography
 H0=H;
 
-% H1 =  H0/4 *sin(xx*(2*pi)*epsilon).*sin(yy*(2*pi)*epsilon);
+H1 =  H0/2 *sin(xx*(1.75*pi)*epsilon).*sin(yy*(1.75*pi)*epsilon);
 
-H1_tiles = H0/4 * (rand(Lx)*2-1);
-H1_grid = kron(H1_tiles,ones(Nx/Lx/epsilon));
-H1 = H1_grid(end/2 - Nx/2 + 1:end/2 + Nx/2,1:Ny);
+%H1_tiles = H0/4 * (rand(Lx)*2-1);H1_grid = kron(H1_tiles,ones(round(Nx/Lx/epsilon)));H1 = H1_grid(end/2 - Nx/2 + 1:end/2 + Nx/2,1:Ny);
+
+%H1_tiles = H0/4 * (rand(Lx)*2-1);H1_grid = kron(H1_tiles,ones(Nx/Lx));H1 = H1_grid(end/2 - Nx/2 + 1:end/2 + Nx/2,1:Ny);
+%H1=epsilon*H*ones(Nx);
+
 
 H_grid= H + epsilon*H1;
 kf_grid=zeros(size(H_grid));
@@ -175,6 +176,8 @@ kx_deriv =  2*pi*1i/Lx*[0:(Nx/2-1) (-Nx/2):-1];
 ky_deriv =  2*pi*1i/Ly*[0:(Ny/2-1) (-Ny/2):-1];
 [Kx_deriv,Ky_deriv] = meshgrid(kx_deriv,ky_deriv);
 K2_deriv = Kx_deriv.^2 + Ky_deriv.^2;
+Kneg2=1./K2_deriv;
+Kneg2(1,1)=0;
 %% 1D real k vectors for H
 
 K_vec = linspace(0,kmax,Nk)';
@@ -184,7 +187,7 @@ K2_vec = K_vec.^2;
 K3_vec = K_vec.^3;
 
 b4_prefactor=-d0*M*G/(2*pi); %-b0 m g TF/(2 pi rho)
-
+lap_d1=real(ifft2(K2_deriv.*fft2(d1)));
 
 %% HF approximation
 TD=1/(8*pi^2*nu0);
