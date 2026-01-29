@@ -1,4 +1,4 @@
-function [d_eta, d_etaprime] = eta0k_rhs(eta_hat, etaprime_hat,R_hat, t, p)
+function [d_eta, d_etaprime] = eta1_rhs(eta_hat, etaprime_hat,R_hat, t, p)
 
     
     d_eta=etaprime_hat;

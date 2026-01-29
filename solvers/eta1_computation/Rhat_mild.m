@@ -1,9 +1,6 @@
 function R_hat=Rhat_mild(eta0_hat,eta0p_hat,t,p)
-    % x , y : position to evaluate R
-    % t : current time value
-    % xp, yp : position of past impacts
-    % H_data, dH_data : (Nk, Nimpacts), H and dH associated with each past impact evaluated at time t
-    % p : parameter structure
+    %% Rhat computed assuming slow varying topography
+
 
 
     [eta0p_hat,eta0pp_hat] = eta0k_rhs(eta0_hat,eta0p_hat,t,p);

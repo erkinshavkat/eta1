@@ -48,11 +48,12 @@ rng(0)
 %% Dimensional topography
 H0=H;
 
+%% Sinusoidal
 H1 =  H0/2 *sin(xx*(1.75*pi)*epsilon).*sin(yy*(1.75*pi)*epsilon);
 
+%% Random tiles
 %H1_tiles = H0/4 * (rand(Lx)*2-1);H1_grid = kron(H1_tiles,ones(round(Nx/Lx/epsilon)));H1 = H1_grid(end/2 - Nx/2 + 1:end/2 + Nx/2,1:Ny);
 
-%H1_tiles = H0/4 * (rand(Lx)*2-1);H1_grid = kron(H1_tiles,ones(Nx/Lx));H1 = H1_grid(end/2 - Nx/2 + 1:end/2 + Nx/2,1:Ny);
 %H1=epsilon*H*ones(Nx);
 
 
